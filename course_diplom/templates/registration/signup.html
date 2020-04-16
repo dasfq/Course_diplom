@@ -1,0 +1,25 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="header"></div>
+        <h2>Регистрация</h2>
+    </div>
+    <div>
+        <form action='{% url "signup" %}' method="POST">
+            {% csrf_token %}
+            <label for="username">Email:</label>
+            {{ form.email }}</br>
+            <label for="password">Пароль:</label>
+            {{ form.password1 }}</br>
+            <label for="password_confirm">Повторите пароль:</label>
+            {{ form.password2 }}</br>
+            <input type="submit" value="Зарегистрироваться"></br>
+            <p>{{ form.helptext }}</p>
+            {{ form.errors }}
+        </form>
+    </div>
+{% endblock %}
