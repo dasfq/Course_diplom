@@ -29,6 +29,8 @@ class OrderInfoAdmin(admin.ModelAdmin):
     pass
 
 class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ('email', 'type', 'first_name', 'last_name', 'middle_name', 'company', 'position', )
+    # inlines = ["date", 'user', 'item']
     pass
 
 admin.site.register(Category, CategoryAdmin)
