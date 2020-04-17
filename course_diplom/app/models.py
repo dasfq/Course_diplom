@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from .managers import CustomUserManager
-from time import timezone
 
 STATE_CHOICES = (
     ('basket', 'Статус корзины'),
