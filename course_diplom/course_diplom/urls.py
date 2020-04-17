@@ -16,14 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from app.views import UserViewSet
+from app.views import UserViewSet, signup
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename="user")
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls)
+    path('admin/', admin.site.urls),
+    path('signup/', signup, name='signup')
     # path('api/users', UserView.as_view({'get': 'list'})),
     # path('api/users/<int:pk>', UserView.as_view({'get': 'retrieve'})),
     # path('api/groups', GroupViewSet.as_view()),
