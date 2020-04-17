@@ -1,6 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import PermissionsMixin
 from .managers import CustomUserManager
+from time import timezone
 
 STATE_CHOICES = (
     ('basket', 'Статус корзины'),
@@ -18,13 +20,28 @@ USER_TYPE_CHOICES = (
 )
 
 
-class CustomUser(User):
-    middle_name = models.CharField(max_length=30, blank=True)
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(verbose_name="E-mail", unique=True)
+    first_name = models.CharField(verbose_name='Имя' ,max_length=30, blank=True)
+    last_name = models.CharField(verbose_name="Фамилия", max_length=30, blank=True)
+    middle_name = models.CharField(verbose_name="Отчество", max_length=30, blank=True)
     company = models.CharField(verbose_name='Компания', max_length=30, blank=True)
     position = models.CharField(verbose_name='Должность', max_length=30, blank=True)
     type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=5, default='buyer')
+
+    is_staff = models.BooleanField(('staff status'), default=False, help_text=('Designates whether the user can log into this admin site.'),)
+    is_active = models.BooleanField(('active'), default=True, help_text=(
+            'Designates whether this user should be treated as active. '
+            'Unselect this instead of deleting accounts.'
+        ),
+    )
+    date_joined = models.DateTimeField(('date joined'), auto_now_add=True)
+
+
     USERNAME_FIELD = 'email'
-    object = CustomUserManager()
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
