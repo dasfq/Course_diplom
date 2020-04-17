@@ -6,7 +6,7 @@ from app.models import CustomUser
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('username', 'password', 'email', 'first_name', 'last_name', 'middle_name', 'company', 'position', 'type',)
+        fields = ('password', 'email', 'first_name', 'last_name', 'middle_name', 'company', 'position', 'type',)
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

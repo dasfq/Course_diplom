@@ -5,13 +5,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from django.contrib.auth.models import Group, User
+from django.contrib.auth import get_user_model
 from .serializers import UserSerializer, GroupSerializer
 from app.models import Category, CustomUser, Item, Order, ItemInfo, OrderInfo, Shop, Parameter, ItemParameter
-from .forms import UserForm
+from .forms import RegistrationForm
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
 
 
@@ -66,17 +67,17 @@ class UserViewSet(viewsets.ModelViewSet):
 #
 #
 
-def signup():
+def signup(request):
     User = get_user_model()
     if request.method == 'POST':
-        form = UserForm(request.POST)
-        form.Meta.model = User
+        form = RegistrationForm(request.POST)
+        form.Meta.model = CustomUser
         if form.is_valid():
             password = form.cleaned_data.get('password1')
             email = form.cleaned_data.get('email')
             User.objects.create_user(email, password)
     else:
-        form = UserForm()
+        form = RegistrationForm()
     context = {
         'form': form,
     }
