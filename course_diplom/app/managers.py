@@ -2,11 +2,11 @@ from django.contrib.auth.base_user import BaseUserManager
 
 class CustomUserManager(BaseUserManager):
 
-    def create_user(self, email, password, **extra_fields):
+    def create_user(self, email, password, first_name, last_name, middle_name, company, position, type):
         if not email:
             raise ValueError('Provide email')
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, first_name=first_name, last_name=last_name, middle_name=middle_name, company=company, position=position,type=type)
         user.set_password(password)
         user.save(using=self._db)
         return user

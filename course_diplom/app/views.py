@@ -75,7 +75,13 @@ def signup(request):
         if form.is_valid():
             password = form.cleaned_data.get('password1')
             email = form.cleaned_data.get('email')
-            User.objects.create_user(email, password)
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            middle_name = form.cleaned_data.get('middle_name')
+            company = form.cleaned_data.get('company')
+            position = form.cleaned_data.get('position')
+            type = form.cleaned_data.get('type')
+            CustomUser.objects.create_user(email, password, first_name, last_name, middle_name, company, position, type)
     else:
         form = RegistrationForm()
     context = {
