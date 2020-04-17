@@ -1,4 +1,3 @@
-{% extends "shop/base.html" %}
 {% load static %}
 
 {% block title %}Регистрация{% endblock %}
@@ -13,10 +12,23 @@
             {% csrf_token %}
             <label for="username">Email:</label>
             {{ form.email }}</br>
-            <label for="password">Пароль:</label>
+            <label for="passwor1">Пароль:</label>
             {{ form.password1 }}</br>
-            <label for="password_confirm">Повторите пароль:</label>
+            <label for="password2">Повторите пароль:</label>
             {{ form.password2 }}</br>
+            <label for="first_name">Имя:</label>
+            {{ form.first_name }}</br>
+            <label for="last_name">Фамилия:</label>
+            {{ form.last_name }}</br>
+            <label for="middle_name">Отчество:</label>
+            {{ form.middle_name }}</br>
+            <label for="company">Компания:</label>
+            {{ form.company }}</br>
+            <label for="position">Должность:</label>
+            {{ form.position }}</br>
+            <label for="type">Тип:</label>
+            {{ form.type }}</br>
+
             <input type="submit" value="Зарегистрироваться"></br>
             <p>{{ form.helptext }}</p>
             {{ form.errors }}
