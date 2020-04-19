@@ -1,12 +1,13 @@
 from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import UserManager, BaseUserManager
 
 class CustomUserManager(BaseUserManager):
 
-    def create_user(self, email, password, first_name, last_name, middle_name, company, position, type):
+    def create_user(self, email, password, first_name='', last_name='', middle_name='', company='', position='', type="shop", **extra_fields):
         if not email:
             raise ValueError('Provide email')
         email = self.normalize_email(email)
-        user = self.model(email=email, first_name=first_name, last_name=last_name, middle_name=middle_name, company=company, position=position,type=type)
+        user = self.model(email=email, first_name=first_name, last_name=last_name, middle_name=middle_name, company=company, position=position,type=type, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
