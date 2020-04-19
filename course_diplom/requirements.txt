@@ -1,3 +1,4 @@
 djangorestframework
 djangorestframework-stubs
 django-allauth
+django-rest-auth
