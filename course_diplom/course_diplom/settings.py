@@ -37,14 +37,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    ### my app
     'app',
+
+    ### DRF module
     'rest_framework',
+
+    ### all-auth and rest-auth modules for signin in/out/up
     'rest_framework.authtoken',
     'rest_auth',
     'rest_auth.registration',
     "django.contrib.sites",
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
 ]
 
 MIDDLEWARE = [
@@ -132,7 +138,12 @@ AUTH_USER_MODEL = 'app.CustomUser'
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'app.api.serializers.CustomUserSerializer',
 }
-
+REST_AUTH_REGISTER_SERIALIZERS = {
+        'REGISTER_SERIALIZER': 'app.api.serializers.CustomRegisterSerializer',
+}
+# REST_AUTH_LOGIN_SERIALIZERS = {
+#         'LOGIN_SERIALIZER': 'app.api.serializers.CustomLoginSerializer',
+# }
 
 ### setting for all-auth to perform login through 'email' field
 
@@ -142,3 +153,8 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_EMAIL_FIELD = "email"
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+ACCOUNT_EMAIL_VERIFICATION = None
+
+
