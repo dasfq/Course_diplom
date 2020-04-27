@@ -3,6 +3,7 @@ from .models import Category, CustomUser, Item, Order, ItemInfo, OrderInfo, Shop
 
 
 class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'pk',)
     pass
 
 class ShopAdmin(admin.ModelAdmin):
