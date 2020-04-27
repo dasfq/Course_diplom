@@ -1,12 +1,40 @@
 from rest_framework import viewsets
-from app.api.serializers import CustomUserSerializer
-from app.models import CustomUser
+from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer, CategorySerializer, ShopSerializer
+from app.models import CustomUser, Item, ItemInfo, Category, Shop
+from rest_auth.views import LoginView
+from rest_auth.serializers import LoginSerializer
+from rest_framework import request
 
+class CustomLoginView(LoginView):
+    serializer_class = LoginSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+    # lookup_field = 'email'
 
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'pk'
+
+class ItemViewSet(viewsets.ModelViewSet):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        shop_id = self.request.query_params.get('shop_id', None)
+        category_id = self.request.query_params.get('category_id', None)
+        queryset = Shop.objects.filter(id=shop_id,
+                                      category__id=category_id)
+        return queryset
+
+
+
+class ShopViewSet(viewsets.ModelViewSet):
+    serializer_class = ShopSerializer
+    queryset = Shop.objects.all()
 
     # def list(self, request):
     #     queryset = User.objects.all()
