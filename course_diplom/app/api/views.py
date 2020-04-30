@@ -38,11 +38,12 @@ class ContactsViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         user_email = self.kwargs['usercontact_email']
-        user=CustomUser.objects.get(email=user_email)
-        print(user)
-        serializer = ContactSerializer(user, data=request.data)
+        user = CustomUser.objects.get(email=user_email)
+        serializer = ContactSerializer(data=request.data) ## если здесь добавим user, то в сериализаторе
+                                                          ## вызовется метод update. Поэтому user передадим
+                                                          ## далее в методе save()
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(user=user)
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, headers=headers)
 

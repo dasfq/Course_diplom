@@ -84,10 +84,12 @@ class ShopSerializer(serializers.HyperlinkedModelSerializer):
 
 class ContactSerializer(serializers.ModelSerializer):
 
-    def create(self, validated_data, user):
-        print('444444')
-        contact = Contact(user=user, adress=validated_data['adress'], phone=validated_data['phone'])
-        print('444444', contact)
+
+    def create(self, validated_data):
+        contact = Contact(adress=validated_data['adress'], phone=validated_data['phone'])
+        contact.save()
+        user = validated_data['user']  ## здесь юзера берём из val_data, т.к. во вьё передали через метод save()
+        contact.user.add(user)
         return contact
 
     class Meta:
