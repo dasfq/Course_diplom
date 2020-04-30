@@ -1,17 +1,51 @@
-from rest_framework import viewsets
-from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer, CategorySerializer, ShopSerializer
-from app.models import CustomUser, Item, ItemInfo, Category, Shop
+from rest_framework import viewsets, response
+from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer, CategorySerializer, ShopSerializer, ContactSerializer
+from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact
 from rest_auth.views import LoginView
 from rest_auth.serializers import LoginSerializer
-from rest_framework import request
+from rest_framework.decorators import action
+import json
+from django.http import JsonResponse
 
+
+## пока не используется
 class CustomLoginView(LoginView):
     serializer_class = LoginSerializer
+##
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    # lookup_field = 'email'
+    lookup_field = 'email'
+    lookup_value_regex = '[\w@.]+'
+
+
+    ## не получилось. методы post, put содержали поля для users, а не для contacts. ПОэтому буду делать через nested routers.
+    # @action(methods=['get', 'post', 'put', 'destroy'], detail=True, url_name='contacts', url_path='contacts')
+    # def contacts(self, request, pk=None):
+    #     contact = Contact.objects.filter(user__pk=pk)
+    #     serializer = ContactSerializer(contact, many=True)
+    #     return response.Response(serializer.data)
+
+class ContactsViewSet(viewsets.ModelViewSet):
+    serializer_class = ContactSerializer
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        queryset = Contact.objects.filter(user__email=self.kwargs['usercontact_email'])
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        user_email = self.kwargs['usercontact_email']
+        user=CustomUser.objects.get(email=user_email)
+        print(user)
+        serializer = ContactSerializer(user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        headers = self.get_success_headers(serializer.data)
+        return response.Response(serializer.data, headers=headers)
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -35,34 +69,6 @@ class ItemViewSet(viewsets.ModelViewSet):
 class ShopViewSet(viewsets.ModelViewSet):
     serializer_class = ShopSerializer
     queryset = Shop.objects.all()
-
-    # def list(self, request):
-    #     queryset = User.objects.all()
-    #     serializer_class = UserSerializer(queryset, many=True)
-    #     return Response(serializer_class.data)
-    #
-    # def retrieve(self, request, pk=0):
-    #     queryset = User.objects.all()
-    #     user = get_object_or_404(queryset, pk=pk)
-    #     serializer_class = UserSerializer(user)
-    #     return Response(serializer_class.data)
-
-    #
-    # queryset = User.objects.all()
-    # serializer_class = UserSerializer
-    # lookup_field = ('username', 'password', 'email', 'groups',)
-    #
-    # def get(self, request, *args, **kwargs):
-    #     serializer = UserSerializer(User.objects.all(), many=True)
-    #     return Response(serializer.data)
-    #
-    # def post(self, request, *args, **kwargs):
-    #     serializer = UserSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     else:
-    #         return Response(serializer.errors)
 
 #
 # class GroupViewSet(APIView):

@@ -18,6 +18,11 @@ USER_TYPE_CHOICES = (
     ('buyer', 'Покупатель'),
 )
 
+# CONTACT_CHOICES = (
+#     ('cell_phone', 'Номер телефона'),
+#     ('adress', "Почтовый адрес"),
+# )
+
 default_description = 'Узнать характеристики товара можно у вашего менеджера'
 
 
@@ -51,7 +56,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'Пользователь'
         verbose_name_plural = "Список пользователей"
         ordering = ('email',)
-
 
 class Category(models.Model):
     name = models.CharField(max_length=50, verbose_name='Название категории')
@@ -165,3 +169,16 @@ class OrderInfo(models.Model):
     class Meta:
         verbose_name = 'Заказанная позиция'
         verbose_name_plural = "Список заказанных позиций"
+
+
+class Contact(models.Model):
+    user = models.ManyToManyField(CustomUser, verbose_name='Пользователь')
+    adress = models.CharField(verbose_name='Адрес', default='', max_length=10)
+    phone = models.CharField(verbose_name='Телефон', default='+7(900)123-45-67', max_length=30)
+
+    class Meta:
+        verbose_name = "Контактные данные"
+        verbose_name_plural = "Контактные данные"
+
+    def __str__(self):
+        return str(self.pk)

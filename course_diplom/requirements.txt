@@ -3,3 +3,4 @@ djangorestframework-stubs
 django-allauth
 django-rest-auth
 pyyaml
+drf-nested-routers

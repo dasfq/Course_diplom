@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Group
-from app.models import CustomUser, Item, ItemInfo, Category, Shop
+from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact
 from rest_auth import serializers as auth_serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from allauth.account.adapter import get_adapter
@@ -51,7 +51,9 @@ class CustomRegisterSerializer(RegisterSerializer, serializers.ModelSerializer):
 class CustomUserSerializer(auth_serializers.UserDetailsSerializer):
     class Meta:
         model = CustomUser
-        fields = ('pk', 'email', 'password', 'first_name', 'last_name', 'middle_name', 'company', 'position', 'type',)
+        fields = ('pk', 'email', 'password', 'first_name', 'last_name', 'middle_name', 'company', 'position', 'type', 'contact_set')
+        depth = 1
+
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -65,7 +67,6 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ItemSerializer(serializers.HyperlinkedModelSerializer):
-    # category = CategorySerializer()
     class Meta:
         model = Item
         fields = ('pk', 'category', 'name',)
@@ -76,10 +77,19 @@ class ItemSerializer(serializers.HyperlinkedModelSerializer):
 class ShopSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Shop
-        fields = ('pk', 'name', 'url', 'is_active', 'category')
+        fields = ('pk', 'name', 'url', 'is_active', 'category',)
         extra_kwargs = {
             'category': {'lookup_field': 'pk'}
         }
 
+class ContactSerializer(serializers.ModelSerializer):
 
+    def create(self, validated_data, user):
+        print('444444')
+        contact = Contact(user=user, adress=validated_data['adress'], phone=validated_data['phone'])
+        print('444444', contact)
+        return contact
 
+    class Meta:
+        model = Contact
+        fields = ('adress', 'phone', 'pk',)

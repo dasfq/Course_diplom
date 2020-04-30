@@ -1,9 +1,12 @@
 from django.contrib import admin
-from .models import Category, CustomUser, Item, Order, ItemInfo, OrderInfo, Shop, Parameter, ItemParameter
+from .models import Category, CustomUser, Item, Order, ItemInfo, OrderInfo, Shop, Parameter, ItemParameter, Contact
 
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'pk',)
+    pass
+
+class ContactAdmin(admin.ModelAdmin):
     pass
 
 class ShopAdmin(admin.ModelAdmin):
@@ -22,16 +25,20 @@ class ItemInfoAdmin(admin.ModelAdmin):
     pass
 
 class OrderAdmin(admin.ModelAdmin):
-    # list_display = ("date", 'user')
-    # inlines = ["date", 'user', 'item']
     pass
 
 class OrderInfoAdmin(admin.ModelAdmin):
     pass
 
+## модель through, которую django создаёт автоматом для m2m связей.
+class ContactsInfoInline(admin.TabularInline):
+    model = Contact.user.through
+
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'type', 'first_name', 'last_name', 'middle_name', 'company', 'position', )
-    # inlines = ["date", 'user', 'item']
+    list_display = ('email', 'pk', 'type', 'first_name', 'last_name', 'middle_name', 'company', 'position', )
+    inlines = [ContactsInfoInline]
+
+class ContactAdmin(admin.ModelAdmin):
     pass
 
 admin.site.register(Category, CategoryAdmin)
@@ -43,3 +50,4 @@ admin.site.register(Parameter, ParameterAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(OrderInfo, OrderInfoAdmin)
+admin.site.register(Contact, ContactAdmin)
