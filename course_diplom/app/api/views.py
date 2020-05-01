@@ -1,5 +1,6 @@
 from rest_framework import viewsets, response, status
-from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer, CategorySerializer, ShopSerializer, ContactSerializer
+from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer,\
+    CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer
 from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact
 from rest_auth.views import LoginView
 from rest_auth.serializers import LoginSerializer
@@ -33,7 +34,7 @@ class ContactsViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
     def get_queryset(self):
-        queryset = Contact.objects.filter(user__email=self.kwargs['usercontact_email'])
+        queryset = Contact.objects.filter(user__email=self.kwargs['usercontact_email'])   ##[basename_lookupfield]
         return queryset
 
     def create(self, request, *args, **kwargs):
@@ -53,18 +54,26 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
 class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all()
     serializer_class = ItemSerializer
     lookup_field = 'pk'
 
     def get_queryset(self):
         shop_id = self.request.query_params.get('shop_id', None)
         category_id = self.request.query_params.get('category_id', None)
-        queryset = Shop.objects.filter(id=shop_id,
+        queryset = Item.objects.filter(iteminfo__shop__id=shop_id,
                                       category__id=category_id)
         return queryset
 
+class ItemInfoViewSet(viewsets.ModelViewSet):
+    serializer_class = ItemInfoSerializer
+    lookup_field = 'pk'
 
+    def get_queryset(self):
+        shop_id = self.request.query_params.get('shop_id', None)
+        category_id = self.request.query_params.get('category_id', None)
+        queryset = ItemInfo.objects.filter(shop__id=shop_id,
+                                      item__category__id=category_id)
+        return queryset
 
 class ShopViewSet(viewsets.ModelViewSet):
     serializer_class = ShopSerializer

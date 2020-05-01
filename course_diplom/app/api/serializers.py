@@ -69,21 +69,27 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 class ItemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Item
-        fields = ('pk', 'category', 'name',)
+        fields = ('category', 'name',)
         extra_kwargs = {
-            'category': {'view_name': 'category-detail', 'lookup_field': 'pk'}
+            'category': {'lookup_field': 'pk'}
         }
+
+class ItemInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItemInfo
+        fields = ('pk', 'item', 'price', 'in_stock_qty',)
+        depth = 2
+
 
 class ShopSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Shop
         fields = ('pk', 'name', 'url', 'is_active', 'category',)
-        extra_kwargs = {
-            'category': {'lookup_field': 'pk'}
-        }
+        # extra_kwargs = {
+        #     'category': {'lookup_field': 'pk'}
+        # }
 
 class ContactSerializer(serializers.ModelSerializer):
-
 
     def create(self, validated_data):
         contact = Contact(adress=validated_data['adress'], phone=validated_data['phone'])

@@ -87,7 +87,6 @@ class Shop(models.Model):
 
 class Item(models.Model):
     category = models.ManyToManyField(Category, verbose_name='Категория товаров', related_name='products', blank=True)
-    # category = models.ForeignKey(Category, verbose_name='Категория', , on_delete=models.CASCADE)
     name = models.CharField(max_length=80, verbose_name='Название')
 
     class Meta:
@@ -100,8 +99,7 @@ class Item(models.Model):
 
 
 class ItemInfo(models.Model):
-    item = models.ForeignKey(Item, verbose_name='Товар', related_name='item_infos', blank=True,
-                             on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, verbose_name='Товар', blank=True, on_delete=models.CASCADE)
     model = models.CharField(max_length=80, verbose_name='Модель', blank=True)
     description = models.CharField(max_length=100, verbose_name='Описание товара', default=default_description)
     external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
