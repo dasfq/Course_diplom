@@ -47,6 +47,14 @@ class ContactsViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, headers=headers)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        print('12312312321')
+        instance.delete()
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
