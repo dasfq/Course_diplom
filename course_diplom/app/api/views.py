@@ -1,4 +1,4 @@
-from rest_framework import viewsets, response
+from rest_framework import viewsets, response, status
 from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer, CategorySerializer, ShopSerializer, ContactSerializer
 from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact
 from rest_auth.views import LoginView
@@ -46,15 +46,6 @@ class ContactsViewSet(viewsets.ModelViewSet):
         serializer.save(user=user)
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, headers=headers)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return response.Response(status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        print('12312312321')
-        instance.delete()
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
