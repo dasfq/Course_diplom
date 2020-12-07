@@ -31,10 +31,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class ContactsViewSet(viewsets.ModelViewSet):
     serializer_class = ContactSerializer
-    lookup_field = 'pk'
+    lookup_field = 'pk'                                  # lookup - это похоже то,что пишем в url:  users/36/
 
     def get_queryset(self):
-        queryset = Contact.objects.filter(user__email=self.kwargs['usercontact_email'])   ##[basename_lookupfield]
+        print("1st print", self.kwargs)
+        queryset = Contact.objects.filter(user__email=self.kwargs['email_email'])   ##[lookup1_lookup2], где
+                                                                                    # lookup1 - это lookup из NestedSimpleRouter
+                                                                                    # lookup2 - это lookup_field у UserViewSet
         return queryset
 
     def create(self, request, *args, **kwargs):
