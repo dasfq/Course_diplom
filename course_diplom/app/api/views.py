@@ -21,14 +21,6 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'email'
     lookup_value_regex = '[\w@.]+'
 
-
-    ## не получилось. методы post, put содержали поля для users, а не для contacts. ПОэтому буду делать через nested routers.
-    # @action(methods=['get', 'post', 'put', 'destroy'], detail=True, url_name='contacts', url_path='contacts')
-    # def contacts(self, request, pk=None):
-    #     contact = Contact.objects.filter(user__pk=pk)
-    #     serializer = ContactSerializer(contact, many=True)
-    #     return response.Response(serializer.data)
-
 class ContactsViewSet(viewsets.ModelViewSet):
     serializer_class = ContactSerializer
     lookup_field = 'pk'                                  # lookup - это похоже то,что пишем в url:  users/36/
@@ -43,11 +35,12 @@ class ContactsViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         user_email = self.kwargs['usercontact_email']
         user = CustomUser.objects.get(email=user_email)
-        serializer = ContactSerializer(data=request.data) ## если здесь добавим user, то в сериализаторе
+        serializer = ContactSerializer(data=request.data) ## если здесь 2м аргументом добавим user, то в сериализаторе
                                                           ## вызовется метод update. Поэтому user передадим
                                                           ## далее в методе save()
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=user)
+        serializer.save(user=user)                        #это отправляет user в метод create сериалайзера, где с ним
+                                                            # потом можно работать
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, headers=headers)
 
@@ -81,6 +74,8 @@ class ItemInfoViewSet(viewsets.ModelViewSet):
 class ShopViewSet(viewsets.ModelViewSet):
     serializer_class = ShopSerializer
     queryset = Shop.objects.all()
+    lookup_field = 'pk'
+
 
 #
 # class GroupViewSet(APIView):

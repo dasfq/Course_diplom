@@ -47,6 +47,6 @@ urlpatterns = [
     # path('api/', include('rest_framework.urls', namespace='rest_framework'))
 
     # REST FRAMEWORK URLS
-    path('api/', include('app.api.urls')),
+    path('api/v1/', include('app.api.urls')),
 ]
 

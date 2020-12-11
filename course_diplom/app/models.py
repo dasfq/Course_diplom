@@ -71,7 +71,7 @@ class Category(models.Model):
 
 class Shop(models.Model):
     name = models.CharField(max_length=50, verbose_name='Название')
-    url = models.URLField(verbose_name='Ссылка', null=True, blank=True)
+    url = models.URLField(verbose_name='Ссылка на файл с товарами', null=True, blank=True)
     is_active = models.BooleanField(verbose_name='Статус приёма заказов', default=True)
     category = models.ManyToManyField(Category, verbose_name="Категория")
 
@@ -172,7 +172,7 @@ class OrderInfo(models.Model):
 class Contact(models.Model):
     user = models.ManyToManyField(CustomUser, verbose_name='Пользователь')
     adress = models.CharField(verbose_name='Адрес', default='', max_length=10)
-    phone = models.CharField(verbose_name='Телефон', default='+7(900)123-45-67', max_length=30)
+    phone = models.CharField(verbose_name='Телефон', default='+7(900)123-45-67', max_length=30, unique=True)
 
     class Meta:
         verbose_name = "Контактные данные"

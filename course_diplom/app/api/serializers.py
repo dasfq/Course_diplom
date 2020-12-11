@@ -6,7 +6,6 @@ from rest_auth.registration.serializers import RegisterSerializer
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import setup_user_email
 
-
 class CustomLoginSerializer(auth_serializers.LoginSerializer):
     username = serializers.HiddenField(default='')
 
@@ -81,13 +80,18 @@ class ItemInfoSerializer(serializers.ModelSerializer):
         depth = 2
 
 
-class ShopSerializer(serializers.HyperlinkedModelSerializer):
+class ShopSerializer(serializers.ModelSerializer):    #Здесь не ГиперМоделСериал, а просто МоделСериал, потому что
+                                                      # ссылочный создаёт
+                                                      #url и path на все поля модели, в т.ч. и для category.
+                                                      #Если это HyperlinkedSerial он создаст ссылку shops/categories/.
+                                                      # Для неё не назначено вьюхи, поэтому вылетает ошибка, could
+                                                      # not reverse. Нужно либо задать вьюху, либо difine serializer
+                                                      # for this field explicitly. Либо сделать просто ModelSerial.
+
     class Meta:
         model = Shop
         fields = ('pk', 'name', 'url', 'is_active', 'category',)
-        # extra_kwargs = {
-        #     'category': {'lookup_field': 'pk'}
-        # }
+
 
 class ContactSerializer(serializers.ModelSerializer):
 

@@ -11,3 +11,16 @@ Queryset для users - по полю email.
 В папке /api содержатся views и urls для DRF. Эти urls нужно включить в основной urls проекта.
 Для поддержки запроса users/email/contacts/pk используются nested_routers.
 
+Во вьюхе мы указываем нужную модель, из которой брать объекты.
+Можно это сделать по разному, но суть одна:
+model = Contact
+queryset = Contact.objects.all()
+def get_quryset(self):
+
+Для включения CBV в маршруты urls, к ним в конце добавляют метод .as_view()
+ 
+
+
+
+==============
+- заменить все запросы к БД на select_related, prefetch, Q(), F()
