@@ -26,4 +26,5 @@ def get_quryset(self):
 
 
 ==============
+- проверить уникальность в магазине ext_id, model и т.д.
 - заменить все запросы к БД на select_related, prefetch, Q(), F()

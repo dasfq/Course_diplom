@@ -2,8 +2,12 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import UserManager, BaseUserManager
 
 class CustomUserManager(BaseUserManager):
-
-    def create_user(self, email, password, first_name='', last_name='', middle_name='', company='', position='', type="shop", **extra_fields):
+    '''
+    этот менеджер не используется в api.
+    это для регистрации через форму, которую я в начале сделал (http://127.0.0.1:8000/signup/).
+    А нужно через api
+    '''
+    def create_user(self, email, password, type, first_name='', last_name='', middle_name='', company='', position='', **extra_fields):
         if not email:
             raise ValueError('Provide email')
         email = self.normalize_email(email)

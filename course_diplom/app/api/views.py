@@ -1,9 +1,14 @@
 from rest_framework import viewsets, response, status
+from rest_framework.views import APIView
 from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer,\
     CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer, ParameterSerializer
-from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter
+from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter, ItemParameter
 from rest_auth.views import LoginView
 from rest_auth.serializers import LoginSerializer
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+import requests
+import yaml
 from rest_framework.decorators import action
 import json
 from django.http import JsonResponse
@@ -80,25 +85,46 @@ class ParameterViewSet(viewsets.ModelViewSet):
     serializer_class = ParameterSerializer
     queryset = Parameter.objects.all()
 
-#
-# class GroupViewSet(APIView):
-#     # authentication_classes = AllowAny
-#     queryset = Group.objects.all()
-#     serializer_class = GroupSerializer
-#     # lookup_field = ('name',)
-#
-#     def get(self, request, *args, **kwargs):
-#         serializer = GroupSerializer(Group.objects.all(), many=True)
-#         return Response(serializer.data)
-#
-#     def post(self, request, *args, **kwargs):
-#         serializer = GroupSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         else:
-#             return Response(serializer.errors)
-#
-#
-#
-#
+class SupplierUpdate(APIView):
+    """
+    Класс для обновления прайса от поставщика.
+    Поставщик подгружает ссылку на сам файл.
+    Т.к. это не viewset, то в urls.py происывается отдельно.
+    """
+    def post(self, request, *args, **kwargs):
+        if request.user.type != 'shop':
+            return JsonResponse({'Status': False, "Error": "Только для магазинов"})
+        url = request.data.get('url')
+        if url:
+            validate_url = URLValidator()
+            try:
+                validate_url(url)
+            except ValidationError as e:
+                return JsonResponse({'status': False, 'Error': str(e)})
+            else:
+                stream = requests.get(url).content                               # загружает как есть в виде yaml
+            stream = yaml.safe_load(stream)                                      # конвертит yaml в JSON
+        shop, _ = Shop.objects.get_or_create(name=stream['shop'])
+        for category in stream['categories']:
+            category_obj, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])
+            shop.category.add(category_obj)
+            shop.save()
+            print('создал shop:', shop)
+        for item in stream['goods']:
+            item_obj, _ = Item.objects.get_or_create(name=item['name'], category__id=item['category'])
+            print('создал item:', item_obj)
+            item_info_obj, _ = ItemInfo.objects.get_or_create(item=item_obj,
+                                                           model=item['model'],
+                                                           price=item['price'],
+                                                           price_rrc=item['price_rrc'],
+                                                           quantity=item['quantity'])
+            print('создал item_info:', item_info_obj)
+            for parameter in item['parameters'].keys():
+                parameter_obj, _ = ItemParameter.objects.get_or_create(item=item_info_obj,
+                                                                    parameter=parameter,
+                                                                    value=item['parameters']['parameter'])
+
+        print(shop)
+        print(new_category)
+        return JsonResponse(stream)
+

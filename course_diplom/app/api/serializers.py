@@ -5,6 +5,7 @@ from rest_auth import serializers as auth_serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import setup_user_email
+from django.http import JsonResponse
 
 class CustomLoginSerializer(auth_serializers.LoginSerializer):
     username = serializers.HiddenField(default='')
@@ -24,7 +25,7 @@ class CustomRegisterSerializer(RegisterSerializer, serializers.ModelSerializer):
             'middle_name': self.validated_data.get('middle_name', ''),
             'company': self.validated_data.get('company', ''),
             'position': self.validated_data.get('position', ''),
-            'type': self.validated_data.get('type', ''),
+            'type': self.validated_data.get('type'),
             'password1': self.validated_data.get('password1', ''),
             'email': self.validated_data.get('email', ''),
         }
