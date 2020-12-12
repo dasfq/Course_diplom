@@ -18,6 +18,9 @@ queryset = Contact.objects.all()
 def get_quryset(self):
 
 Для включения CBV в маршруты urls, к ним в конце добавляют метод .as_view()
+
+Где переопределять методы запроса? Во вьюху передаётся request, а 
+в сериалайзер - validation_data. От этого и плясать.
  
 
 

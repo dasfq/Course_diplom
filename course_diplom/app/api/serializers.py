@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Group
-from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact
+from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter
 from rest_auth import serializers as auth_serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from allauth.account.adapter import get_adapter
@@ -95,6 +95,10 @@ class ShopSerializer(serializers.ModelSerializer):    #Здесь не Гипе�
 
 class ContactSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Contact
+        fields = ('adress', 'phone', 'pk',)
+
     def create(self, validated_data):
         contact = Contact(adress=validated_data['adress'], phone=validated_data['phone'])
         contact.save()
@@ -102,6 +106,9 @@ class ContactSerializer(serializers.ModelSerializer):
         contact.user.add(user)
         return contact
 
+class ParameterSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = Contact
-        fields = ('adress', 'phone', 'pk',)
+        model = Parameter
+        fields = ['pk', 'name']
+

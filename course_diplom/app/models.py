@@ -124,7 +124,7 @@ class Parameter(models.Model):
     class Meta:
         verbose_name = 'Имя параметра'
         verbose_name_plural = "Список всех параметров"
-        ordering = ('-name',)
+        ordering = ('pk',)
 
     def __str__(self):
         return self.name

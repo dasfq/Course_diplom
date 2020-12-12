@@ -1,7 +1,7 @@
 from rest_framework import viewsets, response, status
 from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer,\
-    CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer
-from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact
+    CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer, ParameterSerializer
+from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter
 from rest_auth.views import LoginView
 from rest_auth.serializers import LoginSerializer
 from rest_framework.decorators import action
@@ -76,6 +76,9 @@ class ShopViewSet(viewsets.ModelViewSet):
     queryset = Shop.objects.all()
     lookup_field = 'pk'
 
+class ParameterViewSet(viewsets.ModelViewSet):
+    serializer_class = ParameterSerializer
+    queryset = Parameter.objects.all()
 
 #
 # class GroupViewSet(APIView):
