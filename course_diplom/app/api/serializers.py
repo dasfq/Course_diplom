@@ -87,9 +87,12 @@ class ItemParametersField(serializers.RelatedField):
 
 
 class ItemInfoSerializer(serializers.ModelSerializer):
+    # можно выбрать конкретный тип RelatedField и будет меняться
+    # внешний вид в браузере. Также можно в скобках поля указать конкретный queryset для этого поля.
+
     item = serializers.SlugRelatedField(slug_field='name',
-                                        read_only=True)      # можно выбрать тип RelatedField и будет меняться
-    shop = serializers.SlugRelatedField(slug_field='name',   # внешний вид в браузере. Есть аргумент queryset=...
+                                        read_only=True)
+    shop = serializers.SlugRelatedField(slug_field='name',
                                         read_only=True)
     item_parameters = ItemParametersField(read_only=True, many=True)
 

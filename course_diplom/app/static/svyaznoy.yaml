@@ -56,3 +56,13 @@ goods:
       "Разрешение (пикс)": 1792x828
       "Встроенная память (Гб)": 256
       "Цвет": синий
+  - id: 123456
+    category: 15
+    model: Gorilla Glass 3
+    name: Стекло на телефон
+    price: 200
+    price_rrc: 500
+    quantity: 10
+    parameters:
+      "Грани": 3d
+      "Цвет": прозрачный

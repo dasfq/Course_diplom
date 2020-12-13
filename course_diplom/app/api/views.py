@@ -77,14 +77,18 @@ class ItemViewSet(viewsets.ModelViewSet):
 class ItemInfoViewSet(viewsets.ModelViewSet):
     serializer_class = ItemInfoSerializer
     lookup_field = 'pk'
-    queryset = ItemInfo.objects.all()
-    #
-    # def get_queryset(self):
-    #     shop_id = self.request.query_params.get('shop_id', None)
-    #     category_id = self.request.query_params.get('category_id', None)
-    #     queryset = ItemInfo.objects.filter(shop__id=shop_id,
-    #                                   item__category__id=category_id)
-    #     return queryset
+
+    def get_queryset(self):
+        shop_id = self.request.query_params.get('shop_id', None)
+        category_id = self.request.query_params.get('category_id', None)
+        if shop_id:
+            queryset = ItemInfo.objects.filter(shop__id=shop_id)
+        else: queryset = ItemInfo.objects.all()
+        if category_id:
+            queryset = queryset.filter(item__category__id=category_id)
+        # queryset = ItemInfo.objects.filter(shop__id=shop_id,
+        #                               item__category__id=category_id)
+        return queryset
 
 class ShopViewSet(viewsets.ModelViewSet):
     serializer_class = ShopSerializer
@@ -115,6 +119,7 @@ class SupplierUpdate(APIView):
                 stream = requests.get(url).content                               # загружает как есть в виде yaml
             stream = yaml.safe_load(stream)                                      # конвертит yaml в JSON
         shop, _ = Shop.objects.get_or_create(name=stream['shop'])
+        shop.url = url
         for category in stream['categories']:
             category_obj, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])
             shop.category.add(category_obj)
