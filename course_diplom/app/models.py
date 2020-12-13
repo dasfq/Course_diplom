@@ -114,6 +114,11 @@ class ItemInfo(models.Model):
         verbose_name_plural = "Информации о товаре"
         ordering = ('-item',)
 
+        # задаёт ограничение уникальности для данных полей.
+        constraints = [
+            models.UniqueConstraint(fields=['item', 'shop', 'external_id'], name='unique_item_info')
+        ]
+
     def __str__(self):
         return self.item.name
 

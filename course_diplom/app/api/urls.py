@@ -1,6 +1,6 @@
 from django.urls import path, include
 from ..api.views import UserViewSet, CustomLoginView, ItemViewSet, CategoryViewSet, ShopViewSet, ContactsViewSet,\
-    ItemInfoViewSet, ParameterViewSet, SupplierUpdate, ItemParamsViewSet
+    ItemInfoViewSet, ParameterViewSet, SupplierUpdate, ItemParamsViewSet, StatusUpdate
 # from rest_framework import routers
 from rest_framework_nested import routers
 
@@ -22,5 +22,6 @@ urlpatterns = router.urls + users_router.urls + [
     path('login/', CustomLoginView.as_view(), name='login'),
     path('/', include('rest_auth.urls')),
     path('registration/', include('rest_auth.registration.urls')),
-    path('supplier/update/', SupplierUpdate.as_view(), name='update-items')
+    path('supplier/update/', SupplierUpdate.as_view(), name='update-items'),
+    path('supplier/status/', StatusUpdate.as_view(), name='update-status'),
 ]

@@ -103,9 +103,11 @@ class SupplierUpdate(APIView):
     """
     Класс для обновления прайса от поставщика.
     Поставщик подгружает ссылку на сам файл.
-    Т.к. это не viewset, то в urls.py происывается отдельно.
+    Т.к. это не viewset, то в urls.py прописывается отдельно.
     """
     def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False, "Error": "Log-in required"}, status=403)
         if request.user.type != 'shop':
             return JsonResponse({'Status': False, "Error": "Только для магазинов"})
         url = request.data.get('url')
@@ -140,5 +142,30 @@ class SupplierUpdate(APIView):
                 ItemParameter.objects.get_or_create(item=item_info_obj,
                                                     parameter=parameter_obj,
                                                     value=value)
-        return JsonResponse(stream)
+        return JsonResponse({"Status": True})
 
+class StatusUpdate(APIView):
+    """
+    Класс для получения и обновления статуса магазина.
+    """
+
+    def get(self, request, *args, **kwargs):
+        if request.user.type != 'shop':
+            return JsonResponse({"Status": False, "Error": "Только для магазинов"})
+        if not request.user.is_authenticated:
+            return JsonResponse({"Status": False, "Error": "Log-in required"}, status=403)
+        shop_id = request.data.get('shop_id')
+        print('принтую', shop_id)
+        shop = Shop.objects.get(id=shop_id)
+        return JsonResponse(shop)
+
+
+    def post(self, request, *args, **kwargs):
+        if request.user.type != shop:
+            return JsonResponse({"Status": False, "Error": "Только для магазинов"})
+        if not request.user.is_authanticated:
+            return JsonResponse({"Status": False, "Error": "Log-in required"}, status=403)
+        new_status = request.data.get('status')
+        shop_id = request.data.get('shop_id')
+        shop = Shop.objects.get(id=shop_id).update(status=new_status)
+        return JsonResponse({"Status": True}, shop)
