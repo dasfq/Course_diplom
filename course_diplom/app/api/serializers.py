@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Group
-from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter
+from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter, ItemParameter
 from rest_auth import serializers as auth_serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from allauth.account.adapter import get_adapter
@@ -66,19 +66,37 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
         fields = ('pk','name',)
 
 
-class ItemSerializer(serializers.HyperlinkedModelSerializer):
+class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ('category', 'name',)
-        extra_kwargs = {
-            'category': {'lookup_field': 'pk'}
-        }
+        fields = '__all__'
+
+        # Ниже -  только для Hyperlinked сериалайзера, чтобы он знал по какому полю строить ссылку во вложенный объект.
+        # extra_kwargs = {
+        #     'category': {'lookup_field': 'pk'}
+        # }
+
+class ItemParametersField(serializers.RelatedField):
+    # Это класс, для отображения в браузере поля item_parameters в более удобном виде.
+    # Этот класс нужно вставить в сериалайзер ниже.
+    # obj - это объект 'ItemParameter object'
+    def to_representation(self, obj):
+        param_name = obj.parameter.name
+        param_value = obj.value
+        return '%s - %s' % (param_name, param_value)
+
 
 class ItemInfoSerializer(serializers.ModelSerializer):
+    item = serializers.SlugRelatedField(slug_field='name',
+                                        read_only=True)      # можно выбрать тип RelatedField и будет меняться
+    shop = serializers.SlugRelatedField(slug_field='name',   # внешний вид в браузере. Есть аргумент queryset=...
+                                        read_only=True)
+    item_parameters = ItemParametersField(read_only=True, many=True)
+
     class Meta:
         model = ItemInfo
-        fields = ('pk', 'item', 'price', 'in_stock_qty',)
-        depth = 2
+        fields = ("external_id", 'pk','item', 'model', 'price', 'in_stock_qty', "shop", "item_parameters",)
+        depth = 1
 
 
 class ShopSerializer(serializers.ModelSerializer):    #Здесь не ГиперМоделСериал, а просто МоделСериал, потому что
@@ -108,8 +126,17 @@ class ContactSerializer(serializers.ModelSerializer):
         return contact
 
 class ParameterSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Parameter
-        fields = ['pk', 'name']
+        fields = ['name', 'pk' ]
+
+class ItemParamsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItemParameter
+        fields = ['item', 'parameter', 'value', 'id']       # здесь же задаётся порядок отображения в браузере
+        # depth = 1       если указать - будет вложенный словарь, если нет - то только поле id. Чтобы все id было name,
+        # можно указать конкретно SlugField
+
+    parameter = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    # item = serializers.SlugRelatedField(slug_field='name', read_only=True)
 

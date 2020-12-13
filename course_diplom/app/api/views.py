@@ -1,7 +1,8 @@
 from rest_framework import viewsets, response, status
 from rest_framework.views import APIView
 from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer,\
-    CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer, ParameterSerializer
+    CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer, ParameterSerializer,\
+    ItemParamsSerializer
 from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter, ItemParameter
 from rest_auth.views import LoginView
 from rest_auth.serializers import LoginSerializer
@@ -57,24 +58,33 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     lookup_field = 'pk'
+    queryset = Item.objects.all()
 
-    def get_queryset(self):
-        shop_id = self.request.query_params.get('shop_id', None)
-        category_id = self.request.query_params.get('category_id', None)
-        queryset = Item.objects.filter(iteminfo__shop__id=shop_id,
-                                      category__id=category_id)
-        return queryset
+    # Этот метод, если нужно удалитьт все Item
+    # def destroy(self, *args, **kwargs):
+    #     Item.objects.all().delete()
+    #     return JsonResponse()
+
+
+
+    # def get_queryset(self):
+    #     shop_id = self.request.query_params.get('shop_id', None)
+    #     category_id = self.request.query_params.get('category_id', None)
+    #     queryset = Item.objects.filter(iteminfo__shop__id=shop_id,
+    #                                   category__id=category_id)
+    #     return queryset
 
 class ItemInfoViewSet(viewsets.ModelViewSet):
     serializer_class = ItemInfoSerializer
     lookup_field = 'pk'
-
-    def get_queryset(self):
-        shop_id = self.request.query_params.get('shop_id', None)
-        category_id = self.request.query_params.get('category_id', None)
-        queryset = ItemInfo.objects.filter(shop__id=shop_id,
-                                      item__category__id=category_id)
-        return queryset
+    queryset = ItemInfo.objects.all()
+    #
+    # def get_queryset(self):
+    #     shop_id = self.request.query_params.get('shop_id', None)
+    #     category_id = self.request.query_params.get('category_id', None)
+    #     queryset = ItemInfo.objects.filter(shop__id=shop_id,
+    #                                   item__category__id=category_id)
+    #     return queryset
 
 class ShopViewSet(viewsets.ModelViewSet):
     serializer_class = ShopSerializer
@@ -84,6 +94,10 @@ class ShopViewSet(viewsets.ModelViewSet):
 class ParameterViewSet(viewsets.ModelViewSet):
     serializer_class = ParameterSerializer
     queryset = Parameter.objects.all()
+
+class ItemParamsViewSet(viewsets.ModelViewSet):
+    serializer_class = ItemParamsSerializer
+    queryset = ItemParameter.objects.all()
 
 class SupplierUpdate(APIView):
     """
@@ -109,22 +123,26 @@ class SupplierUpdate(APIView):
             category_obj, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])
             shop.category.add(category_obj)
             shop.save()
-            print('создал shop:', shop)
+            ItemInfo.objects.filter(shop__id=shop.id).delete()
         for item in stream['goods']:
-            item_obj, _ = Item.objects.get_or_create(name=item['name'], category__id=item['category'])
+            item_obj, _ = Item.objects.get_or_create(name=item['name'])
+            item_obj.category.add(Category.objects.get(id=item['category']))
+            print('cat:',item['category'])
             print('создал item:', item_obj)
             item_info_obj, _ = ItemInfo.objects.get_or_create(item=item_obj,
-                                                           model=item['model'],
-                                                           price=item['price'],
-                                                           price_rrc=item['price_rrc'],
-                                                           quantity=item['quantity'])
+                                                              model=item['model'],
+                                                              price=item['price'],
+                                                              price_rrc=item['price_rrc'],
+                                                              in_stock_qty=item['quantity'],
+                                                              external_id=item['id'],
+                                                              shop=shop)
             print('создал item_info:', item_info_obj)
             for parameter in item['parameters'].keys():
-                parameter_obj, _ = ItemParameter.objects.get_or_create(item=item_info_obj,
-                                                                    parameter=parameter,
-                                                                    value=item['parameters']['parameter'])
-
-        print(shop)
-        print(new_category)
+                print('13123123', parameter)
+                parameter_obj, _ = Parameter.objects.get_or_create(name=parameter)
+                item_parameter_obj = ItemParameter.objects.get_or_create(item=item_info_obj,
+                                                                    parameter=parameter_obj,
+                                                                    value=item['parameters'].get(parameter))
+                print(item_parameter_obj)
         return JsonResponse(stream)
 
