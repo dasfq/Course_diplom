@@ -124,14 +124,14 @@ class Parameter(models.Model):
     class Meta:
         verbose_name = 'Имя параметра'
         verbose_name_plural = "Список всех параметров"
-        ordering = ('pk',)
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
 
 
 class ItemParameter(models.Model):
-    item = models.ForeignKey(ItemInfo, verbose_name='Информация о продукте', related_name='product_parameters',
+    item = models.ForeignKey(ItemInfo, verbose_name='Информация о продукте', related_name='item_parameters',
                              blank=True, on_delete=models.CASCADE)
     parameter = models.ForeignKey(Parameter, verbose_name='Параметр', related_name='product_parameters', blank=True,
                                   on_delete=models.CASCADE)
