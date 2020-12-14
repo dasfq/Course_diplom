@@ -2,18 +2,20 @@ from rest_framework import viewsets, response, status
 from rest_framework.views import APIView
 from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer,\
     CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer, ParameterSerializer,\
-    ItemParamsSerializer
-from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter, ItemParameter
+    ItemParamsSerializer, BasketSerializer
+from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter, ItemParameter, Order, OrderInfo
 from rest_auth.views import LoginView
 from rest_auth.serializers import LoginSerializer
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 import requests
 import yaml
-from rest_framework.decorators import action
-import json
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from json import loads as load_json
 
+from rest_framework.decorators import action
 
 ## пока не используется
 class CustomLoginView(LoginView):
@@ -166,3 +168,35 @@ class StatusUpdate(APIView):
         new_status = request.data.get('is_active')
         data = self.shop(request, new_status)
         return JsonResponse(data)
+
+class BasketView(LoginRequiredMixin, APIView):
+    # """
+    # Класс для добавления управления корзиной
+    # """
+    def post(self, request, *args, **kwargs):
+        raw_data = request.data.get('items')
+        if raw_data:
+            try:
+                data = load_json(raw_data)
+            except:
+                return JsonResponse({"Status": False, "Error": "Wrong input format"})
+            else:
+                items_added = 0
+                basket, _ = Order.objects.get_or_create(user=request.user, status='basket')
+                for item in data:
+                    item.update({'order': basket.id})
+                    serializer = BasketSerializer(data=item)
+                    if serializer.is_valid():
+                        try:
+                            serializer.save()
+                        except IntegrityError as e:
+                            return JsonResponse({"Status": '1False', "Error": str(e)})
+                        else:
+                            items_added +=1
+                    else:
+                        return JsonResponse({"Status": '2False', "Error": serializer.errors})
+                return JsonResponse({"Status": True, "Добавлено товаров": items_added})
+        return JsonResponse({"Status": False, "Error": "Не все аргументы указаны."})
+
+
+

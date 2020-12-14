@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Group
-from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter, ItemParameter
+from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter, ItemParameter, Order, OrderInfo
 from rest_auth import serializers as auth_serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from allauth.account.adapter import get_adapter
@@ -143,3 +143,7 @@ class ItemParamsSerializer(serializers.ModelSerializer):
     parameter = serializers.SlugRelatedField(slug_field='name', read_only=True)
     # item = serializers.SlugRelatedField(slug_field='name', read_only=True)
 
+class BasketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderInfo
+        fields = '__all__'
