@@ -65,15 +65,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     #     Item.objects.all().delete()
     #     return JsonResponse()
 
-
-
-    # def get_queryset(self):
-    #     shop_id = self.request.query_params.get('shop_id', None)
-    #     category_id = self.request.query_params.get('category_id', None)
-    #     queryset = Item.objects.filter(iteminfo__shop__id=shop_id,
-    #                                   category__id=category_id)
-    #     return queryset
-
 class ItemInfoViewSet(viewsets.ModelViewSet):
     serializer_class = ItemInfoSerializer
     lookup_field = 'pk'
@@ -86,8 +77,6 @@ class ItemInfoViewSet(viewsets.ModelViewSet):
         else: queryset = ItemInfo.objects.all()
         if category_id:
             queryset = queryset.filter(item__category__id=category_id)
-        # queryset = ItemInfo.objects.filter(shop__id=shop_id,
-        #                               item__category__id=category_id)
         return queryset
 
 class ShopViewSet(viewsets.ModelViewSet):
