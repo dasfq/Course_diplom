@@ -142,23 +142,27 @@ class StatusUpdate(APIView):
     Класс для получения и обновления статуса магазина.
     """
 
+    def shop(self, request, new_status=None):
+        shop_id = request.data.get('shop_id')
+        shop = Shop.objects.get(id=shop_id)
+        if new_status:
+            shop.is_active = new_status
+        serializer = ShopSerializer(shop)
+        return (serializer.data)
+
     def get(self, request, *args, **kwargs):
         if request.user.type != 'shop':
             return JsonResponse({"Status": False, "Error": "Только для магазинов"})
         if not request.user.is_authenticated:
             return JsonResponse({"Status": False, "Error": "Log-in required"}, status=403)
-        shop_id = request.data.get('shop_id')
-        print('принтую', shop_id)
-        shop = Shop.objects.get(id=shop_id)
-        return JsonResponse(shop)
-
+        data = self.shop(request)
+        return JsonResponse(data)                                        # JsonResponse уже содержит в себе json.dumps()
 
     def post(self, request, *args, **kwargs):
-        if request.user.type != shop:
+        if request.user.type != 'shop':
             return JsonResponse({"Status": False, "Error": "Только для магазинов"})
-        if not request.user.is_authanticated:
+        if not request.user.is_authenticated:
             return JsonResponse({"Status": False, "Error": "Log-in required"}, status=403)
-        new_status = request.data.get('status')
-        shop_id = request.data.get('shop_id')
-        shop = Shop.objects.get(id=shop_id).update(status=new_status)
-        return JsonResponse({"Status": True}, shop)
+        new_status = request.data.get('is_active')
+        data = self.shop(request, new_status)
+        return JsonResponse(data)
