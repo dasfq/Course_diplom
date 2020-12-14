@@ -71,7 +71,7 @@ class ItemSerializer(serializers.ModelSerializer):
         model = Item
         fields = '__all__'
 
-        # Ниже -  только для Hyperlinked сериалайзера, чтобы он знал по какому полю строить ссылку во вложенный объект.
+        # Аттрибут ниже -  только для Hyperlinked сериалайзера, чтобы он знал по какому полю строить ссылку во вложенный объект.
         # extra_kwargs = {
         #     'category': {'lookup_field': 'pk'}
         # }

@@ -88,6 +88,10 @@ class ParameterViewSet(viewsets.ModelViewSet):
     serializer_class = ParameterSerializer
     queryset = Parameter.objects.all()
 
+class ItemParamsViewSet(viewsets.ModelViewSet):
+    serializer_class = ItemParamsSerializer
+    queryset = ItemParameter.objects.all()
+
 class SupplierUpdate(APIView):
     """
     Класс для обновления прайса от поставщика.
