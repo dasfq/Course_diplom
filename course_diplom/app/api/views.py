@@ -218,6 +218,3 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
                         return JsonResponse({"Status": 'False', "Error": serializer.errors})
                 return JsonResponse({"Status": True, "Добавлено товаров": items_added})
         return JsonResponse({"Status": False, "Error": "Не все аргументы указаны."})
-
-
-
