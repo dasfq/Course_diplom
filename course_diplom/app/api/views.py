@@ -188,7 +188,6 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
 
     def post(self, request, *args, **kwargs):
         raw_data = request.data.get('items')
-        print('raw:', raw_data)
         if raw_data:
             try:
                 # data содержит уже dict.
@@ -196,14 +195,13 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
             except:
                 return JsonResponse({"Status": False, "Error": "Wrong input format"})
             else:
-                print('after_load:', data)
                 items_added = 0
                 basket, _ = Order.objects.get_or_create(user=request.user, status='basket')
                 for item in data:
                     # добавляем в словарь нужный ключ, под нужный нам вид объекта модели orderinfo.
                     item.update({'order': basket.id})
-                    # находим существующий объект, если есть, чтобы update() его, а не создавать новый объект.
                     try:
+                        # находим существующий объект, если есть, чтобы update() его, а не создавать новый объект.
                         order_info = OrderInfo.objects.get(order__id=basket.id, item_info__id=item['item_info'])
                     except:
                         serializer = BasketSerializer(data=item)
@@ -212,8 +210,11 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
                         # Можно было бы покруче переопределить в сериалайзере методы update() и там прописать сложение.
                         item['quantity'] += order_info.quantity
                         serializer = BasketSerializer(order_info, data=item)
+                    # is_valid создаёт из dict экземпляры моделей.
                     if serializer.is_valid():
                         try:
+                            # сохраняем эти экземпляры в БД. Если в сериалайзер первый аргумент - объект, то save()
+                            # запустит update(), если только data, то create().
                             serializer.save()
                         except IntegrityError as e:
                             return JsonResponse({"Status": 'False', "Error": str(e)})
@@ -226,18 +227,20 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
 
     def put(self, request, *args, **kwargs):
         # Отличие от POST. POST вызывается со страницы товара. А ПУТ со страницы корзины, когда указываем новые цифры.
-        try:
-            raw_data = load_json(request.data.get['items'])
-        except:
-            return JsonResponse({"Status": False, "Error": "Wrong input format"})
-        else:
-            for item in raw_data:
-                try:
-                    basket = OrderInfo.objects.get(id=item['id'])
-                except:
-                    return JsonResponse({"Status": False, "Error": "Данного товара нет в корзине."})
-                else:
-                    basket.quantity=item['quantity']
+        raw_data = request.data.get('items')
+        if raw_data:
+            try:
+                data_dict = load_json(raw_data)
+            except:
+                return JsonResponse({"Status": False, "Error": "Wrong input format"})
+            else:
+                for item in data_dict:
+                    order_item = OrderInfo.objects.filter(id=item['id'])
+                    if not order_item:
+                        return JsonResponse({"Status": False, "Error": "Такого товара нет в корзине."})
+                    order_item.update(quantity=item['quantity'])
+                return JsonResponse({"Status": True})
+        return JsonResponse({"Status": False, "Error": "Не все аргументы указаны."})
 
 
 
