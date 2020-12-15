@@ -219,5 +219,8 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
                 return JsonResponse({"Status": True, "Добавлено товаров": items_added})
         return JsonResponse({"Status": False, "Error": "Не все аргументы указаны."})
 
+    def put(self, request, *args, **kwargs):
+        # Отличие от POST. POST вызывается со страницы товара. А ПУТ со страницы корзины, когда указываем новые цифры.
+        # Это пишу new_test_branch c Default changelist
 
 
