@@ -146,4 +146,4 @@ class ItemParamsSerializer(serializers.ModelSerializer):
 class BasketSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderInfo
-        fields = '__all__'
+        fields = ('order', 'item', 'quantity',)

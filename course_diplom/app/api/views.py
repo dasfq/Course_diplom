@@ -1,4 +1,4 @@
-from rest_framework import viewsets, response, status
+from rest_framework import viewsets, response, mixins
 from rest_framework.views import APIView
 from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, ItemSerializer,\
     CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer, ParameterSerializer,\
@@ -169,10 +169,24 @@ class StatusUpdate(APIView):
         data = self.shop(request, new_status)
         return JsonResponse(data)
 
-class BasketView(LoginRequiredMixin, APIView):
+@action("GET", 'POST')
+class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
     # """
     # Класс для добавления управления корзиной
     # """
+
+    def get(self, request, *args, **kwargs):
+        orders = OrderInfo.objects.all()
+        serializer = BasketSerializer(orders, many = True)
+        return JsonResponse(serializer.data, safe=False)
+
+    def delete(self, request, *args, **kwargs):
+        orders=OrderInfo.objects.all()
+        orders.delete()
+        serializer = BasketSerializer(orders, many = True)
+        return JsonResponse(serializer.data, safe=False)
+
+
     def post(self, request, *args, **kwargs):
         raw_data = request.data.get('items')
         if raw_data:
