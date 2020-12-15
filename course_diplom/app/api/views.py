@@ -188,25 +188,30 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
 
     def post(self, request, *args, **kwargs):
         raw_data = request.data.get('items')
+        print('raw:', raw_data)
         if raw_data:
             try:
+                # data содержит уже dict.
                 data = load_json(raw_data)
             except:
                 return JsonResponse({"Status": False, "Error": "Wrong input format"})
             else:
+                print('after_load:', data)
                 items_added = 0
                 basket, _ = Order.objects.get_or_create(user=request.user, status='basket')
                 for item in data:
-                    # склеиваем куски json, под нужный нам вид объекта.
+                    # добавляем в словарь нужный ключ, под нужный нам вид объекта модели orderinfo.
                     item.update({'order': basket.id})
                     # находим существующий объект, если есть, чтобы update() его, а не создавать новый объект.
-                    order_info = OrderInfo.objects.get(order__id=basket.id, item_info__id=item['item_info'])
-                    if order_info:
+                    try:
+                        order_info = OrderInfo.objects.get(order__id=basket.id, item_info__id=item['item_info'])
+                    except:
+                        serializer = BasketSerializer(data=item)
+                    else:
                         # добавляем в data=item количество из запроса.
+                        # Можно было бы покруче переопределить в сериалайзере методы update() и там прописать сложение.
                         item['quantity'] += order_info.quantity
                         serializer = BasketSerializer(order_info, data=item)
-                    else:
-                        serializer = BasketSerializer(data=item)
                     if serializer.is_valid():
                         try:
                             serializer.save()
@@ -221,6 +226,20 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
 
     def put(self, request, *args, **kwargs):
         # Отличие от POST. POST вызывается со страницы товара. А ПУТ со страницы корзины, когда указываем новые цифры.
-        # Это пишу new_test_branch c Default changelist
+        try:
+            raw_data = load_json(request.data.get['items'])
+        except:
+            return JsonResponse({"Status": False, "Error": "Wrong input format"})
+        else:
+            for item in raw_data:
+                try:
+                    basket = OrderInfo.objects.get(id=item['id'])
+                except:
+                    return JsonResponse({"Status": False, "Error": "Данного товара нет в корзине."})
+                else:
+                    basket.quantity=item['quantity']
+
+
+
 
 
