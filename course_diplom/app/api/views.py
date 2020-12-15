@@ -169,7 +169,6 @@ class StatusUpdate(APIView):
         data = self.shop(request, new_status)
         return JsonResponse(data)
 
-@action("GET", 'POST')
 class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
     # """
     # Класс для добавления управления корзиной
@@ -198,17 +197,25 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
                 items_added = 0
                 basket, _ = Order.objects.get_or_create(user=request.user, status='basket')
                 for item in data:
+                    # склеиваем куски json, под нужный нам вид объекта.
                     item.update({'order': basket.id})
-                    serializer = BasketSerializer(data=item)
+                    # находим существующий объект, если есть, чтобы update() его, а не создавать новый объект.
+                    order_info = OrderInfo.objects.get(order__id=basket.id, item_info__id=item['item_info'])
+                    if order_info:
+                        # добавляем в data=item количество из запроса.
+                        item['quantity'] += order_info.quantity
+                        serializer = BasketSerializer(order_info, data=item)
+                    else:
+                        serializer = BasketSerializer(data=item)
                     if serializer.is_valid():
                         try:
                             serializer.save()
                         except IntegrityError as e:
-                            return JsonResponse({"Status": '1False', "Error": str(e)})
+                            return JsonResponse({"Status": 'False', "Error": str(e)})
                         else:
                             items_added +=1
                     else:
-                        return JsonResponse({"Status": '2False', "Error": serializer.errors})
+                        return JsonResponse({"Status": 'False', "Error": serializer.errors})
                 return JsonResponse({"Status": True, "Добавлено товаров": items_added})
         return JsonResponse({"Status": False, "Error": "Не все аргументы указаны."})
 
