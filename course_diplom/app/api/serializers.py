@@ -143,7 +143,16 @@ class ItemParamsSerializer(serializers.ModelSerializer):
     parameter = serializers.SlugRelatedField(slug_field='name', read_only=True)
     # item = serializers.SlugRelatedField(slug_field='name', read_only=True)
 
+class ItemInfoField(serializers.RelatedField):
+    # класс для отображения поля item_info в нужно виде в BasketSerializer()
+    def to_representation(self, value):
+        id = value.id
+        item_name = value.item.name
+        return '%s: %s' % (id, item_name)
+
 class BasketSerializer(serializers.ModelSerializer):
+    item_info = ItemInfoField(read_only=True)
+
     class Meta:
         model = OrderInfo
         fields = ('id', 'order', 'item_info', 'quantity',)

@@ -1,6 +1,6 @@
 from django.urls import path, include
 from ..api.views import UserViewSet, CustomLoginView, ItemViewSet, CategoryViewSet, ShopViewSet, ContactsViewSet,\
-    ItemInfoViewSet, ParameterViewSet, SupplierUpdate, ItemParamsViewSet, StatusUpdate, BasketView
+    ItemInfoViewSet, ParameterViewSet, SupplierUpdate, ItemParamsViewSet, StatusUpdate, BasketView, OrderViewSet
 # from rest_framework import routers
 from rest_framework_nested import routers
 
@@ -12,6 +12,7 @@ router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'shops', ShopViewSet, basename='suppliers')
 router.register(r'parameters', ParameterViewSet, basename='parameters')
 router.register(r'itemparams', ItemParamsViewSet, basename='item-params')
+router.register(r'orders', OrderViewSet, basename='orders')
 
 users_router = routers.NestedSimpleRouter(router, r'users', lookup='email')   # этот лукап нужен в кверисете, чтобы передать в фильтр нужный email
 users_router.register(r'contacts', ContactsViewSet, basename="user-contacts") # 'basename' is optional. Needed only if the same viewset

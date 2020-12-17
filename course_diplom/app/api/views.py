@@ -243,6 +243,31 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
         return JsonResponse({"Status": False, "Error": "Не все аргументы указаны."})
 
 
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = BasketSerializer
+
+    def get_queryset(self):                             # для лукапов и связей между моделями используют __
+        user_id = self.request.user.id
+        orders = OrderInfo.objects.filter(
+            order__user_id=user_id
+        ).exclude(
+            order__status='basket'
+        )
+        return orders
+
+    def list(self, request, *args, **kwargs):
+        return JsonResponse({"Status": True})
 
 
-
+#  через APIView
+# class OrderView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
+#     serializer_class = BasketSerializer
+#
+#     def get_queryset(self):                             # для лукапов и связей между моделями используют __
+#         user_id = self.request.user.id
+#         orders = OrderInfo.objects.filter(
+#             order__user_id=user_id
+#         ).exclude(
+#             order__status='basket'
+#         )
+#         return orders
