@@ -4,7 +4,7 @@ from app.api.serializers import CustomUserSerializer, CustomLoginSerializer, Ite
     CategorySerializer, ShopSerializer, ContactSerializer, ItemInfoSerializer, ParameterSerializer,\
     ItemParamsSerializer, BasketSerializer
 from app.models import CustomUser, Item, ItemInfo, Category, Shop, Contact, Parameter, ItemParameter, Order, OrderInfo
-from rest_auth.views import LoginView
+from rest_auth.views import LoginView, LogoutView
 from rest_auth.serializers import LoginSerializer
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
@@ -21,7 +21,6 @@ from rest_framework.decorators import action
 class CustomLoginView(LoginView):
     serializer_class = LoginSerializer
 ##
-
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
