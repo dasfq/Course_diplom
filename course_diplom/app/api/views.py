@@ -185,7 +185,7 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
         return JsonResponse(serializer.data, safe=False)
 
     def delete(self, request, *args, **kwargs):
-        orders=OrderInfo.objects.all()
+        orders=OrderInfo.objects.all().filter(order__user_id=request.user.id)
         orders.delete()
         serializer = BasketSerializer(orders, many = True)
         return JsonResponse(serializer.data, safe=False)
@@ -198,37 +198,30 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
                 # data содержит уже dict.
                 data = load_json(raw_data)
             except:
-                return JsonResponse({"Status": False, "Error": "Wrong input format"})
+                return JsonResponse({"Status1": False, "Error": "Wrong input format"})
             else:
                 items_added = 0
-                basket, _ = Order.objects.get_or_create(user=request.user, status='basket')
+                basket, _ = Order.objects.get_or_create(user_id=request.user.id, status='basket')
                 for item in data:
-                    # добавляем в словарь нужный ключ, под нужный нам вид объекта модели orderinfo.
+                    # добавляем в словарь нужный ключ, под нужный нам вид объекта OrderInfo.
                     item.update({'order': basket.id})
-                    try:
-                        # находим существующий объект, если есть, чтобы update() его, а не создавать новый объект.
-                        order_info = OrderInfo.objects.get(order__id=basket.id, item_info__id=item['item_info'])
-                    except:
-                        serializer = BasketSerializer(data=item)
-                    else:
-                        # добавляем в data=item количество из запроса.
-                        # Можно было бы покруче переопределить в сериалайзере методы update() и там прописать сложение.
-                        item['quantity'] += order_info.quantity
-                        serializer = BasketSerializer(order_info, data=item)
+                    order_info, _ = OrderInfo.objects.get_or_create(
+                        order_id=basket.id, item_info_id=item['item_info'], defaults={'quantity': 0}
+                    )
+                    # добавляем в data=item количество из запроса.
+                    # Можно было бы и покруче - переопределить в сериалайзере методы update() и там прописать сложение.
+                    item['quantity'] += order_info.quantity
+                    # когда указан первый аргумент - существующий объект, то сериалайзер при вызове save() его обновит update(),
+                    # а не create() новый
+                    serializer = BasketSerializer(order_info, data=item)
                     # is_valid создаёт из dict экземпляры моделей.
                     if serializer.is_valid():
-                        try:
-                            # сохраняем эти экземпляры в БД. Если в сериалайзер первый аргумент - объект, то save()
-                            # запустит update(), если только data, то create().
-                            serializer.save()
-                        except IntegrityError as e:
-                            return JsonResponse({"Status": 'False', "Error": str(e)})
-                        else:
-                            items_added +=1
+                        serializer.save()
+                        items_added +=1
                     else:
-                        return JsonResponse({"Status": 'False', "Error": serializer.errors})
-                return JsonResponse({"Status": True, "Добавлено товаров": items_added})
-        return JsonResponse({"Status": False, "Error": "Не все аргументы указаны."})
+                        return JsonResponse({"Status3": 'False', "Error": serializer.errors})
+                return JsonResponse({"Status4": True, "Добавлено товаров": items_added})
+        return JsonResponse({"Status5": False, "Error": "Не все аргументы указаны."})
 
     def put(self, request, *args, **kwargs):
         # Отличие от POST. POST вызывается со страницы товара. А ПУТ со страницы корзины, когда лишь обновляем цифры.
@@ -262,6 +255,25 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return JsonResponse({"Status": True})
+
+    def create(self, request, *args, **kwargs):
+        print('creating')
+        order = OrderInfo.objects.all().filter(
+            order__user_id=request.user.id, order__status='basket'
+        )
+        if order:
+            order.status = 'new'
+            serializer = BasketSerializer(order)
+            return serializer.data
+        else:
+            return JsonResponse({'Status': False, 'Error': 'Сначала добавьте товары в корзину'})
+        # if serializer.is_valid():
+        #     try:
+        #         serializer.save()
+        #     except IntegrityError as e:
+        #         return JsonResponse({'status': False, "Error": str(e)})
+        # else:
+        #     return JsonResponse({'status': False, "Error": serializer.errors})
 
 
 #  через APIView
