@@ -180,7 +180,9 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
     # """
 
     def get(self, request, *args, **kwargs):
-        orders = OrderInfo.objects.all().filter(order__user_id=request.user.id)
+        orders = OrderInfo.objects.all().filter(order__user_id=request.user.id, order__status='basket')
+        if not orders:
+            return JsonResponse({"Status": False, "Error": "В корзине нет товаров!"})
         serializer = BasketSerializer(orders, many = True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -246,25 +248,23 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):                             # для лукапов и связей между моделями используют __
         user_id = self.request.user.id
-        orders = OrderInfo.objects.filter(
-            order__user_id=user_id
-        ).exclude(
-            order__status='basket'
-        )
-        return orders
+        print(user_id)
+        orders = OrderInfo.objects.all()
 
-    def list(self, request, *args, **kwargs):
-        return JsonResponse({"Status": True})
+        # orders = OrderInfo.objects.all().filter(order__user_id=user_id).exclude(order__status='basket')
+        return orders
 
     def create(self, request, *args, **kwargs):
         print('creating')
-        order = OrderInfo.objects.all().filter(
-            order__user_id=request.user.id, order__status='basket'
+        order = Order.objects.get(
+            user_id=request.user.id, status='basket'
         )
         if order:
             order.status = 'new'
-            serializer = BasketSerializer(order)
-            return serializer.data
+            order.save()
+            order_info = OrderInfo.objects.filter(order__user_id=request.user.id, order_id=order.id)
+            serializer = BasketSerializer(order_info, many=True)
+            return JsonResponse(serializer.data, safe=False)
         else:
             return JsonResponse({'Status': False, 'Error': 'Сначала добавьте товары в корзину'})
         # if serializer.is_valid():
