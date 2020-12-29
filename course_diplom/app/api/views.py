@@ -29,6 +29,12 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'email'
     lookup_value_regex = '[\w@.]+'
 
+    def list(self, request, *args, **kwargs):
+        print(self.queryset)
+        current_user = request.user.id
+        serializer = CustomUserSerializer(self.queryset, many=True)
+        return JsonResponse({'current_user': current_user, 'users_list': serializer.data})
+
 class ContactsViewSet(viewsets.ModelViewSet):
     serializer_class = ContactSerializer
     lookup_field = 'pk'                                  # lookup - это похоже то,что пишем в url:  users/36/
