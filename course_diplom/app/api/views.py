@@ -180,7 +180,7 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
     # """
 
     def get(self, request, *args, **kwargs):
-        orders = OrderInfo.objects.all()
+        orders = OrderInfo.objects.all().filter(order__user_id=request.user.id)
         serializer = BasketSerializer(orders, many = True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -231,7 +231,7 @@ class BasketView(LoginRequiredMixin, mixins.ListModelMixin, APIView):
         return JsonResponse({"Status": False, "Error": "Не все аргументы указаны."})
 
     def put(self, request, *args, **kwargs):
-        # Отличие от POST. POST вызывается со страницы товара. А ПУТ со страницы корзины, когда указываем новые цифры.
+        # Отличие от POST. POST вызывается со страницы товара. А ПУТ со страницы корзины, когда лишь обновляем цифры.
         raw_data = request.data.get('items')
         if raw_data:
             try:
